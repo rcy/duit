@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+require 'net/http'
+require 'json'
+
+def post token, summary
+  uri = URI("http://localhost:3000/items.json?auth_token=#{token}")
+  Net::HTTP.start(uri.host, uri.port) do |http|
+    request = Net::HTTP::Post.new(uri.request_uri, initheader={'Content-Type' =>'application/json'})
+    request.body = {"summary" => summary}.to_json
+
+    response = http.request request
+
+    puts response.code, response.message, response.body
+  end
+end
+
+def get_token
+  # read authentication token as string in first line of ~/.duitrc
+  file = File.open(File.expand_path('~/.duitrc'))
+  file.lines.first.chomp
+end
+
+if ARGV.length > 0
+  token = get_token
+  summary = ARGV.join(' ')
+  post token, summary
+else
+  puts "you need to du something"
+end
